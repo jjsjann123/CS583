@@ -4,17 +4,28 @@ datafile = "F:\\Course\\CS583\\PROJ1\\testbuild\\data.txt"
 paramfile = "F:\\Course\\CS583\\PROJ1\\testbuild\\para.txt"
 db = []
 mis = []
-sdc = []
+sdc = 0.0
+sup = {}
+frequentItemSet = {}
 
 def main():
+    val = []
     checkSequence(datafile,db)
     #print db
     #for seq in db:
     #    print seq
     #print len(db)
-    checkParams(paramfile,mis,sdc)
-    print mis
-    print sdc[0]
+    checkParams(paramfile,mis,val)
+    #for miss in mis:
+    #    print miss
+    #print val[0]
+    sdc = val[0]
+    #print sdc
+    #print mis[10]
+    pickFrequentItem(db,sup)
+    #for item in sup.values():
+    #    print item
+    
     
 #error check TBD
 #...
@@ -58,6 +69,28 @@ def checkParams(filename, mis, sdc):
             #print m
             mm =  map(float,m)
             sdc.append( mm[0] )
+
+#error check: range should be modified for new test cases
+def pickFrequentItem(db,sup):
+    for index in range(1,49+1):
+        for seq in db:
+            for itemset in seq:
+                if itemset.count(index)>0:
+                    if sup.has_key(index):
+                        sup[index]=sup[index]+1
+                    else:
+                        sup.setdefault(index,1)
+                    break
+    for index in sup:
+        print sup[index]/float(len(sup)), ' ',  mis[index-1]
+        if sup[index]/float(len(sup)) >= mis[index-1]:
+            frequentItemSet.setdefault(index,sup[index])
+    
+    print frequentItemSet
+        
+
+
+
             
 if __name__ == "__main__":
     main()
