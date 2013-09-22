@@ -1,23 +1,28 @@
 import re
+import operator
 
 datafile = "F:\\Course\\CS583\\PROJ1\\testbuild\\data.txt"
 paramfile = "F:\\Course\\CS583\\PROJ1\\testbuild\\para.txt"
 db = []
-mis = []
+dbSize = 0
+numItems = 0
+mis = {}
 sdc = 0.0
 sup = {}
 frequentItemSet = {}
+ascendFrequentItemSet = {}  # {(index, (MIS, sup))...}, ascend by MIS
 
 def main():
     val = []
     checkSequence(datafile,db)
+    dbSize = len(db)
     #print db
     #for seq in db:
     #    print seq
     #print len(db)
     checkParams(paramfile,mis,val)
-    #for miss in mis:
-    #    print miss
+    #for miss,misss in mis.items():
+    #    print miss, '\t',misss
     #print val[0]
     sdc = val[0]
     #print sdc
@@ -25,7 +30,14 @@ def main():
     pickFrequentItem(db,sup)
     #for item in sup.values():
     #    print item
-    
+    numItems = len(sup)
+    #print dbSize
+    #print numItems
+
+    #ascendFrequentItemSet = sorted(frequentItemSet.iteritems(), key=operator.itemgetter(0))
+    #ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
+    print ascendFrequentItemSet
+    #print ascendMIS
     
 #error check TBD
 #...
@@ -62,15 +74,21 @@ def checkParams(filename, mis, sdc):
         #if m.isdigit():
         #    print m
         if re.findall(r'^MIS',sline):
+            i = re.findall(r'^MIS\((\d*)\)',sline)
+            ii = map(int,i)
+            #print ii[0]
             mm = map(float,m)
-            mis.append(mm[0])
+            #mis.append(mm[0])
+            mis.setdefault(ii[0],mm[0])
         elif SDC_flag==False and re.findall(r'^SDC',sline):
             SDC_flag=True
             #print m
             mm =  map(float,m)
             sdc.append( mm[0] )
 
-#error check: range should be modified for new test cases
+#error check TBD:
+#range should be modified for new test cases
+#2. mis might need to be a dict, in case the element is not consecutive ones
 def pickFrequentItem(db,sup):
     for index in range(1,49+1):
         for seq in db:
@@ -81,12 +99,21 @@ def pickFrequentItem(db,sup):
                     else:
                         sup.setdefault(index,1)
                     break
+    #numItems = len(sup)   #this won't work for the external variables(immutable) outside def.
+    #print 'in pfi: ', numItems
     for index in sup:
-        print sup[index]/float(len(sup)), ' ',  mis[index-1]
-        if sup[index]/float(len(sup)) >= mis[index-1]:
+        #print sup[index]/float(len(sup)), ' ',  mis[index-1]
+        if sup[index]/float(len(sup)) >= mis[index]:
             frequentItemSet.setdefault(index,sup[index])
-    
-    print frequentItemSet
+
+    ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
+    #print ascendMIS
+    for item in ascendMIS:
+        if frequentItemSet.has_key(item[0]):
+            ascendFrequentItemSet.setdefault(item[0], (ascendMIS[item[0]-1][1],sup[item[0]]))
+            
+    #for index,val in frequentItemSet.items():
+    #    print index, ' ', val
         
 
 
