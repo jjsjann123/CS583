@@ -9,7 +9,7 @@ numItems = 0
 mis = {}
 sdc = 0.0
 sup = {}
-frequentItemSet = {}
+frequentItemSet = {}        #ordered by index - format- "index:sup"
 ascendFrequentItemSet = {}  # {(index, (MIS, sup))...}, ascend by MIS
 
 def main():
@@ -28,16 +28,24 @@ def main():
     #print sdc
     #print mis[10]
     pickFrequentItem(db,sup)
-    #for item in sup.values():
-    #    print item
-    numItems = len(sup)
+    #print sup[48]
+    for item in sup.items():
+        print item
+
+    #numItems = len(sup)
     #print dbSize
     #print numItems
 
     #ascendFrequentItemSet = sorted(frequentItemSet.iteritems(), key=operator.itemgetter(0))
     #ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
-    print ascendFrequentItemSet
+    #print ascendFrequentItemSet
     #print ascendMIS
+
+    a = [[33, 37], [49], [17, 22, 34, 44], [22, 31, 37, 45]]
+    print 'a= ',a
+    print filteredSeqBySDC(a,sup,diffItemsInSequence(a),37,sdc,len(db))
+    #print removeItemFromSequence(a,38)
+    #print diffItemsInSequence(a)
     
 #error check TBD
 #...
@@ -105,7 +113,7 @@ def pickFrequentItem(db,sup):
         #print sup[index]/float(len(sup)), ' ',  mis[index-1]
         if sup[index]/float(len(sup)) >= mis[index]:
             frequentItemSet.setdefault(index,sup[index])
-
+    
     ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
     #print ascendMIS
     for item in ascendMIS:
@@ -115,7 +123,39 @@ def pickFrequentItem(db,sup):
     #for index,val in frequentItemSet.items():
     #    print index, ' ', val
         
+def removeItemFromSequence(seq,val):
+    ret = []
+    for itemset in seq:
+        output = []
+        for item in itemset:
+            if item != val:
+                output.append(item)
+        if len(output)>0:
+            ret.append(output)
+    return ret
 
+def diffItemsInSequence(seq):   
+    ret = []
+    for itemset in seq:
+        for item in itemset:
+            if ret.count(item) == 0:
+                ret.append(item)
+    return ret
+
+#items-output of diffItemsInSequence(..)
+def filteredSeqBySDC(seq,sup,items,val,v_sdc,v_dbsize): #Sk
+    ret = seq
+    #print 'diff items: ',items
+    if items.count(val)<=0:
+        print 'error in filteredSeqBySDC! - val is not contained in the seq'
+    for item in items:
+        if item != val:
+            #print 'item: ',item,' val: ',val,' abs: ',abs(sup[item]-sup[val])
+            if abs(sup[item]-sup[val])>v_sdc*float(v_dbsize):
+                ret = removeItemFromSequence(ret,item)
+    return ret
+            
+            
 
 
             
