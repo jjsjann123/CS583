@@ -1,8 +1,10 @@
 import re
 import operator
 
-datafile = "F:\\Course\\CS583\\PROJ1\\testbuild\\data.txt"
-paramfile = "F:\\Course\\CS583\\PROJ1\\testbuild\\para.txt"
+dir_home = "F:\\Course\\CS583\\PROJ1\\testbuild\\"
+dir_dt = "C:\\RAYMON\\CS583\\project1\\testbuild\\"
+datafile = dir_dt+"data.txt"
+paramfile = dir_dt+"para.txt"
 db = []
 dbSize = 0
 numItems = 0
@@ -29,8 +31,8 @@ def main():
     #print mis[10]
     pickFrequentItem(db,sup)
     #print sup[48]
-    for item in sup.items():
-        print item
+    #for item in sup.items():
+    #    print item
 
     #numItems = len(sup)
     #print dbSize
@@ -42,8 +44,12 @@ def main():
     #print ascendMIS
 
     a = [[33, 37], [49], [17, 22, 34, 44], [22, 31, 37, 45]]
-    print 'a= ',a
-    print filteredSeqBySDC(a,sup,diffItemsInSequence(a),37,sdc,len(db))
+    b = [[33,37],[49],[17]]
+
+    print projection(a,b)
+    
+    #print 'a= ',a
+    #print filteredSeqBySDC(a,sup,37,sdc,len(db))
     #print removeItemFromSequence(a,38)
     #print diffItemsInSequence(a)
     
@@ -143,8 +149,9 @@ def diffItemsInSequence(seq):
     return ret
 
 #items-output of diffItemsInSequence(..)
-def filteredSeqBySDC(seq,sup,items,val,v_sdc,v_dbsize): #Sk
+def filteredSeqBySDC(seq,sup,val,v_sdc,v_dbsize): #Sk
     ret = seq
+    items = diffItemsInSequence(seq)
     #print 'diff items: ',items
     if items.count(val)<=0:
         print 'error in filteredSeqBySDC! - val is not contained in the seq'
@@ -154,8 +161,32 @@ def filteredSeqBySDC(seq,sup,items,val,v_sdc,v_dbsize): #Sk
             if abs(sup[item]-sup[val])>v_sdc*float(v_dbsize):
                 ret = removeItemFromSequence(ret,item)
     return ret
-            
-            
+
+def projection(seq, prefix):
+    retun -1
+
+def checkPrefix(seq,prefix):
+    if cmp(seq[:len(prefix)-1],prefix[:len(prefix)-1])==0:
+        if cmp(prefix[-1], seq[len(prefix)-1][:len(prefix[-1])])==0:
+            for item in prefix[-1]:
+                for i in seq[len(prefix)-1][len(prefix[-1]):]:
+                    if item>i:
+                        return False
+            return True
+    return False
+
+def projection(seq, prefix):
+    if checkPrefix(seq,prefix):
+        if cmp(prefix[-1], seq[len(prefix)-1])==0:
+            return seq[len(prefix):]
+        else:
+            ret = seq[len(prefix):]
+            addItemset = seq[len(prefix)-1][len(prefix[-1]):]
+            addItemset.insert(0,'_')
+            ret.insert(0,addItemset)
+            return ret
+    else:
+        print 'Abort - ', prefix, ' is not a prefix of ', seq
 
 
             
