@@ -44,9 +44,20 @@ def main():
     #print ascendMIS
 
     a = [[33, 37], [49], [17, 22, 34, 44], [22, 31, 37, 45]]
-    b = [[33,37],[49],[17]]
-
+    b = [[33],[22,34]]
+    print a
+    print b
+    output = []
+    #print projection(a,b)
+    #print checkSubList([9],[49,9])
+    #print '\n\n\n\n\n\n'
+    print modifiedCheckPrefix(a,b,output)
+    print output
     print projection(a,b)
+
+    #a=[1,2,3,4,5,6,7,8]
+    #b=[4,5,6,8]
+    #print checkSubList(a,b)
     
     #print 'a= ',a
     #print filteredSeqBySDC(a,sup,37,sdc,len(db))
@@ -162,9 +173,6 @@ def filteredSeqBySDC(seq,sup,val,v_sdc,v_dbsize): #Sk
                 ret = removeItemFromSequence(ret,item)
     return ret
 
-def projection(seq, prefix):
-    retun -1
-
 def checkPrefix(seq,prefix):
     if cmp(seq[:len(prefix)-1],prefix[:len(prefix)-1])==0:
         if cmp(prefix[-1], seq[len(prefix)-1][:len(prefix[-1])])==0:
@@ -175,13 +183,57 @@ def checkPrefix(seq,prefix):
             return True
     return False
 
+# according to the weird description from MS-PS algorithm paper
+# the elements of prefix can be dispersed in each element of the sequence
+# store a list [seq index, item index] in output for the last prefix element index
+# index starts from 0
+def modifiedCheckPrefix(seq, p,output):
+    curElem = 0
+    for itemset in p:
+        #print 'search for new itemset: ',itemset
+        for i in range(curElem,len(seq)):
+            #print 'seq[',i,']:',seq[i],'itemset: ',itemset, 'result: ', checkSubList(seq[i],itemset)
+            checkResult = checkSubList(seq[i],itemset)
+            if checkResult>=0:
+                if cmp(itemset,p[-1])==0:
+                    output.append(i)
+                    output.append(checkResult)
+                    #print 'reach the last prefix element, return true'
+                    return True
+                else:
+                    #print 'match found, continue the match for the next prefix element'
+                    curElem = i+1
+                    break
+            elif len(itemset)!=0 and i==len(seq)-1:
+                return False
+            #print 'search in current sequence element failed, try next sequence element'
+    return False
+
+# l: list,  itemset: pattern to be found.
+# neither contains sublists
+# return the index start from 0
+def checkSubList(l, itemset):
+    if(len(itemset)==0 or len(itemset)>len(l)):
+        return -1
+    for i in range(0,len(l)):
+        if l[i]==itemset[0]:
+            if(len(itemset)==1):
+                return i
+            for j in range(1,len(itemset)):
+                if l[i+j]!=itemset[j]:
+                    return -1
+                elif j==len(itemset)-1:
+                    return i+j
+    return -1
+
 def projection(seq, prefix):
-    if checkPrefix(seq,prefix):
-        if cmp(prefix[-1], seq[len(prefix)-1])==0:
-            return seq[len(prefix):]
+    index = []
+    if modifiedCheckPrefix(seq,prefix,index) == True:
+        if cmp(prefix[-1], seq[index[0]])==0:
+            return seq[index[0]+1:]
         else:
-            ret = seq[len(prefix):]
-            addItemset = seq[len(prefix)-1][len(prefix[-1]):]
+            ret = seq[index[0]+1:]
+            addItemset = seq[index[0]][index[1]+1:]
             addItemset.insert(0,'_')
             ret.insert(0,addItemset)
             return ret
