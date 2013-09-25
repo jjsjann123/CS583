@@ -1,5 +1,6 @@
 import re
 import operator
+from types import *
 
 dir_home = "F:\\Course\\CS583\\PROJ1\\testbuild\\"
 dir_dt = "C:\\RAYMON\\CS583\\project1\\testbuild\\"
@@ -23,8 +24,8 @@ def main():
     #    print seq
     #print len(db)
     checkParams(paramfile,mis,val)
-    #for miss,misss in mis.items():
-    #    print miss, '\t',misss
+    for miss,misss in mis.items():
+        print miss, '\t',misss
     #print val[0]
     sdc = val[0]
     #print sdc
@@ -43,17 +44,25 @@ def main():
     #print ascendFrequentItemSet
     #print ascendMIS
 
-    a = [[33, 37], [49], [17, 22, 34, 44], [22, 31, 37, 45]]
-    b = [[33],[22,34]]
-    print a
-    print b
+    a = [[49], ['_', 37, 34, 44], [22, '_', 37, 45],[42, 32, '_', 37]]
+    b = [[22,34]]
+    c= [a,b]
+    #print a
+    #print b
+    #print c
+
+    #print isNumber('_')
+    #print eval('3')
+    #print findAllPatterns(c)
+    print findAllPatterns(c,0.02)
+    
     output = []
     #print projection(a,b)
     #print checkSubList([9],[49,9])
     #print '\n\n\n\n\n\n'
-    print modifiedCheckPrefix(a,b,output)
-    print output
-    print projection(a,b)
+    #print modifiedCheckPrefix(a,b,output)
+    #print output
+    #print projection(a,b)
 
     #a=[1,2,3,4,5,6,7,8]
     #b=[4,5,6,8]
@@ -151,6 +160,7 @@ def removeItemFromSequence(seq,val):
             ret.append(output)
     return ret
 
+# seq: [[,,],[,,]]
 def diffItemsInSequence(seq):   
     ret = []
     for itemset in seq:
@@ -185,6 +195,8 @@ def checkPrefix(seq,prefix):
 
 # according to the weird description from MS-PS algorithm paper
 # the elements of prefix can be dispersed in each element of the sequence
+# edit: find a subsequence in the sequence that has the prefix of alpha, since it s already
+# lexicographically sorted, the suffix should fine w/o the em-em' check
 # store a list [seq index, item index] in output for the last prefix element index
 # index starts from 0
 def modifiedCheckPrefix(seq, p,output):
@@ -238,10 +250,43 @@ def projection(seq, prefix):
             ret.insert(0,addItemset)
             return ret
     else:
-        print 'Abort - ', prefix, ' is not a prefix of ', seq
+        print 'Abort - ', prefix, ' is not a prefix of the sub-sequence', seq
 
+#find all length-1 patterns in projected database[ [[]..], [[]..], [[]..] ]
+def findAllPatterns(pdb, minsup=0.0):
+    ap = []
+    #threshold = minsup*len(pdb)
+    threshold = minsup*len(db)
+    print pdb
+    print len(pdb)
+    print threshold
+    counterDict = {} # list : sup
+    for s in pdb: #sequence
+        for l in s: #list
+            for i in l: #item
+                if isNumber(i):
+                    p1 = str(i)
+                    if l.index(i)>0 and l[l.index(i)-1]=='_':
+                        p1 = '_'+p1 #complex pattern  "_a"
 
-            
+                    if counterDict.has_key(str(p1)):
+                        counterDict[p1] = counterDict[p1]+1
+                    else:
+                        counterDict.setdefault(p1,1)
+    for string,n in counterDict.iteritems():
+        print string,' ',n
+        if n>=threshold:
+            ap.append(string)
+			                
+    return ap
+
+def isNumber(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+    
 if __name__ == "__main__":
     main()
 
