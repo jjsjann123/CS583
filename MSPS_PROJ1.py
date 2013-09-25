@@ -148,7 +148,8 @@ def pickFrequentItem(db,sup):
             
     #for index,val in frequentItemSet.items():
     #    print index, ' ', val
-        
+
+# remove the all single item = value in sequence
 def removeItemFromSequence(seq,val):
     ret = []
     for itemset in seq:
@@ -183,15 +184,15 @@ def filteredSeqBySDC(seq,sup,val,v_sdc,v_dbsize): #Sk
                 ret = removeItemFromSequence(ret,item)
     return ret
 
-def checkPrefix(seq,prefix):
-    if cmp(seq[:len(prefix)-1],prefix[:len(prefix)-1])==0:
-        if cmp(prefix[-1], seq[len(prefix)-1][:len(prefix[-1])])==0:
-            for item in prefix[-1]:
-                for i in seq[len(prefix)-1][len(prefix[-1]):]:
-                    if item>i:
-                        return False
-            return True
-    return False
+#def checkPrefix(seq,prefix):
+#    if cmp(seq[:len(prefix)-1],prefix[:len(prefix)-1])==0:
+#        if cmp(prefix[-1], seq[len(prefix)-1][:len(prefix[-1])])==0:
+#            for item in prefix[-1]:
+#                for i in seq[len(prefix)-1][len(prefix[-1]):]:
+#                    if item>i:
+#                        return False
+#            return True
+#    return False
 
 # according to the weird description from MS-PS algorithm paper
 # the elements of prefix can be dispersed in each element of the sequence
@@ -250,9 +251,12 @@ def projection(seq, prefix):
             ret.insert(0,addItemset)
             return ret
     else:
+        #exception might be needed
         print 'Abort - ', prefix, ' is not a prefix of the sub-sequence', seq
+        #to be tested
+        return []
 
-#find all length-1 patterns in projected database[ [[]..], [[]..], [[]..] ]
+#find all 1-length patterns in projected database[ [[]..], [[]..], [[]..] ]
 def findAllPatterns(pdb, minsup=0.0):
     ap = []
     #threshold = minsup*len(pdb)
