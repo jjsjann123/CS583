@@ -4,8 +4,8 @@ from types import *
 
 dir_home = "F:\\Course\\CS583\\PROJ1\\testbuild\\"
 dir_dt = "C:\\RAYMON\\CS583\\project1\\testbuild\\"
-datafile = dir_dt+"data.txt"
-paramfile = dir_dt+"para.txt"
+datafile = dir_home+"data.txt"
+paramfile = dir_home+"para.txt"
 db = []
 dbSize = 0
 numItems = 0
@@ -20,32 +20,44 @@ def main():
     checkSequence(datafile,db)
     dbSize = len(db)
     #print db
-    #for seq in db:
-    #    print seq
-    #print len(db)
+    for seq in db:
+        print seq
+    print  'db size: ' ,len(db)
     checkParams(paramfile,mis,val)
-    for miss,misss in mis.items():
-        print miss, '\t',misss
+    print 'MIS: ',mis
+    #for miss,misss in mis.items():
+    #    print miss, '\t',misss
     #print val[0]
     sdc = val[0]
-    #print sdc
+    numItems = len(mis)
+    print 'number of items: ',numItems
+    print 'SDC: ',sdc
     #print mis[10]
-    pickFrequentItem(db,sup)
+    
+    ascendFrequentItemSet = pickFrequentItem(db,sup,numItems)
+    print 'Sup: '
+    print sup
+    print 'ascendFrequentItemSet: '
+    print ascendFrequentItemSet
+    
     #print sup[48]
     #for item in sup.items():
     #    print item
 
-    #numItems = len(sup)
     #print dbSize
     #print numItems
+
+    
+
 
     #ascendFrequentItemSet = sorted(frequentItemSet.iteritems(), key=operator.itemgetter(0))
     #ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
     #print ascendFrequentItemSet
     #print ascendMIS
 
-    a = [[49], ['_', 37, 34, 44], [22, '_', 37, 45],[42, 32, '_', 37]]
-    b = [[22,34]]
+    a = [['49'], ['_26', '37', '34', '44'], ['22', '_26', '37', '45'],['42', '32', '_26', '37']]
+    b = [['22','34']]
+
     c= [a,b]
     #print a
     #print b
@@ -54,7 +66,7 @@ def main():
     #print isNumber('_')
     #print eval('3')
     #print findAllPatterns(c)
-    print findAllPatterns(c,0.02)
+    #print modifiedFindAllPatterns(c,0.05)
     
     output = []
     #print projection(a,b)
@@ -86,8 +98,7 @@ def checkSequence(filename, db):
         m = re.findall(r'{(.*?)}',sline) #find all the itemsets in "{}" as string
         for mm in m:
             mm = re.findall(r'(\d+),*',mm) #find all the item strings of numbers in one itemset
-            mmm = map(int,mm) #convert the strings into integers
-            itemset.append(mmm) #store the numbers
+            itemset.append(map(str,mm)) #store the numbers
         db.append(itemset)
 
 #error check TBD:
@@ -109,8 +120,7 @@ def checkParams(filename, mis, sdc):
         #    print m
         if re.findall(r'^MIS',sline):
             i = re.findall(r'^MIS\((\d*)\)',sline)
-            ii = map(int,i)
-            #print ii[0]
+            ii = map(str,i)
             mm = map(float,m)
             #mis.append(mm[0])
             mis.setdefault(ii[0],mm[0])
@@ -123,31 +133,33 @@ def checkParams(filename, mis, sdc):
 #error check TBD:
 #range should be modified for new test cases
 #2. mis might need to be a dict, in case the element is not consecutive ones
-def pickFrequentItem(db,sup):
-    for index in range(1,49+1):
+def pickFrequentItem(db,sup, ni):
+    #print ni
+    #print mis
+    for index in range(1,ni+1):
         for seq in db:
             for itemset in seq:
-                if itemset.count(index)>0:
-                    if sup.has_key(index):
-                        sup[index]=sup[index]+1
+                if itemset.count(str(index))>0:
+                    if sup.has_key(str(index)):
+                        sup[str(index)]=sup[str(index)]+1
                     else:
-                        sup.setdefault(index,1)
+                        sup.setdefault(str(index),1)
                     break
-    #numItems = len(sup)   #this won't work for the external variables(immutable) outside def.
-    #print 'in pfi: ', numItems
+
     for index in sup:
-        #print sup[index]/float(len(sup)), ' ',  mis[index-1]
+        #print sup[index]/float(len(sup)), ' ',  mis[index]
         if sup[index]/float(len(sup)) >= mis[index]:
             frequentItemSet.setdefault(index,sup[index])
     
     ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
-    #print ascendMIS
+    ret = []
     for item in ascendMIS:
+        #print 'in ascendMIS ',item
         if frequentItemSet.has_key(item[0]):
-            ascendFrequentItemSet.setdefault(item[0], (ascendMIS[item[0]-1][1],sup[item[0]]))
-            
-    #for index,val in frequentItemSet.items():
-    #    print index, ' ', val
+            #print item[0]
+            #ret.setdefault( item[0], ( item[1],sup[item[0]] ) )
+            ret.append(item[0])
+    return ret
 
 # remove the all single item = value in sequence
 def removeItemFromSequence(seq,val):
@@ -239,6 +251,14 @@ def checkSubList(l, itemset):
                     return i+j
     return -1
 
+# p only has two formats '#' or '_#'
+def checkSinglePrefix(seq,p,output):
+    if isNumber(p):
+        return True
+    else:
+        return False
+    
+
 def projection(seq, prefix):
     index = []
     if modifiedCheckPrefix(seq,prefix,index) == True:
@@ -257,13 +277,14 @@ def projection(seq, prefix):
         return []
 
 #find all 1-length patterns in projected database[ [[]..], [[]..], [[]..] ]
+#OUT OF DATE!!! DON'T USE THIS ONE!!
 def findAllPatterns(pdb, minsup=0.0):
     ap = []
     #threshold = minsup*len(pdb)
     threshold = minsup*len(db)
-    print pdb
-    print len(pdb)
-    print threshold
+    #print pdb
+    #print len(pdb)
+    #print threshold
     counterDict = {} # list : sup
     for s in pdb: #sequence
         for l in s: #list
@@ -278,7 +299,30 @@ def findAllPatterns(pdb, minsup=0.0):
                     else:
                         counterDict.setdefault(p1,1)
     for string,n in counterDict.iteritems():
-        print string,' ',n
+        #print string,' ',n
+        if n>=threshold:
+            ap.append(string)
+			                
+    return ap
+
+#find all 1-length patterns in projected database[ [[]..], [[]..], [[]..] ]
+def modifiedFindAllPatterns(pdb, minsup=0.0):
+    ap = []
+    #threshold = minsup*len(pdb)
+    threshold = minsup*len(db)
+    #print pdb
+    #print len(pdb)
+    #print threshold
+    counterDict = {} # list : sup
+    for s in pdb: #sequence
+        for l in s: #list
+            for i in l: #item
+                if counterDict.has_key(i):
+                        counterDict[i] = counterDict[i]+1
+                else:
+                     counterDict.setdefault(i,1)
+    for string,n in counterDict.iteritems():
+       # print string,' ',n
         if n>=threshold:
             ap.append(string)
 			                
