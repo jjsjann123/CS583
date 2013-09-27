@@ -81,9 +81,13 @@ def main():
     #print checkSubList(a,b)
     
     #print 'a= ',a
-    #print filteredSeqBySDC(a,sup,37,sdc,len(db))
-    #print removeItemFromSequence(a,38)
+    #print filteredSeqBySDC(db,sup,'37',sdc,dbSize)
+    #print filteredDBBySDC(db,sup,'1',sdc,dbSize)
+    #print removeItemFromSequence(a,'_26')
     #print diffItemsInSequence(a)
+    for item in removeItemFromDB(db,'48'):
+        print item
+    #print diffItemsInDB(db)
     
 #error check TBD
 #...
@@ -162,38 +166,79 @@ def pickFrequentItem(db,sup, ni):
     return ret
 
 # remove the all single item = value in sequence
-def removeItemFromSequence(seq,val):
+##def removeItemFromSequence(seq,val):
+##    ret = []
+##    for itemset in seq:
+##        output = []
+##        for item in itemset:
+##            if item != val:
+##                output.append(item)
+##        if len(output)>0:
+##            ret.append(output)
+##    return ret
+
+# remove the all single item = value in sequence
+# the null sequence won't be added.
+def removeItemFromDB(db,val):
     ret = []
-    for itemset in seq:
-        output = []
-        for item in itemset:
-            if item != val:
-                output.append(item)
-        if len(output)>0:
-            ret.append(output)
+    for seq in db:
+        outputs = []
+        for itemset in seq:
+            output = []
+            for item in itemset:
+                if item != val:
+                    output.append(item)
+            if len(output)>0:
+                outputs.append(output)
+        if len(outputs)>0:
+            ret.append(outputs)
     return ret
 
 # seq: [[,,],[,,]]
-def diffItemsInSequence(seq):   
+##def diffItemsInSequence(seq):   
+##    ret = []
+##    for itemset in seq:
+##        for item in itemset:
+##            if ret.count(item) == 0:
+##                ret.append(item)
+##    return ret
+
+def diffItemsInDB(db):   
     ret = []
-    for itemset in seq:
-        for item in itemset:
-            if ret.count(item) == 0:
-                ret.append(item)
+    for seq in db:
+        for itemset in seq:
+            for item in itemset:
+                if ret.count(item) == 0:
+                    ret.append(item)
     return ret
 
 #items-output of diffItemsInSequence(..)
-def filteredSeqBySDC(seq,sup,val,v_sdc,v_dbsize): #Sk
-    ret = seq
-    items = diffItemsInSequence(seq)
-    #print 'diff items: ',items
+##def filteredSeqBySDC(seq,sup,val,v_sdc,v_dbsize): #Sk
+##    ret = seq
+##    items = diffItemsInSequence(seq)
+##    print 'diff items: ',items
+##    if items.count(val)<=0:
+##        print 'error in filteredSeqBySDC! - val is not contained in the seq'
+##    for item in items:
+##        if item != val:
+##            print 'item: ',item,' val: ',val,' abs: ',abs(sup[item]-sup[val])
+##            if abs(sup[item]-sup[val])>v_sdc*float(v_dbsize):
+##                ret = removeItemFromSequence(ret,item)
+##    return ret
+
+def filteredDBBySDC(db,sup,val,v_sdc,v_dbsize): #Sk
+    print 'filterDBBySDC- THRESHOLD: ',v_sdc*float(v_dbsize)
+    ret = db
+    items = diffItemsInDB(db)
+    print 'diff items: ',items
     if items.count(val)<=0:
         print 'error in filteredSeqBySDC! - val is not contained in the seq'
     for item in items:
+        
         if item != val:
-            #print 'item: ',item,' val: ',val,' abs: ',abs(sup[item]-sup[val])
+            print 'item: ',item,' val: ',val,' abs: ','item Sup: ',sup[item], ' with ',sup[val], 'margin: ',abs(sup[item]-sup[val])
             if abs(sup[item]-sup[val])>v_sdc*float(v_dbsize):
-                ret = removeItemFromSequence(ret,item)
+                ret = removeItemFromDB(ret,item)
     return ret
 
 #def checkPrefix(seq,prefix):
@@ -212,98 +257,98 @@ def filteredSeqBySDC(seq,sup,val,v_sdc,v_dbsize): #Sk
 # lexicographically sorted, the suffix should fine w/o the em-em' check
 # store a list [seq index, item index] in output for the last prefix element index
 # index starts from 0
-def modifiedCheckPrefix(seq, p,output):
-    curElem = 0
-    for itemset in p:
-        #print 'search for new itemset: ',itemset
-        for i in range(curElem,len(seq)):
-            #print 'seq[',i,']:',seq[i],'itemset: ',itemset, 'result: ', checkSubList(seq[i],itemset)
-            checkResult = checkSubList(seq[i],itemset)
-            if checkResult>=0:
-                if cmp(itemset,p[-1])==0:
-                    output.append(i)
-                    output.append(checkResult)
-                    #print 'reach the last prefix element, return true'
-                    return True
-                else:
-                    #print 'match found, continue the match for the next prefix element'
-                    curElem = i+1
-                    break
-            elif len(itemset)!=0 and i==len(seq)-1:
-                return False
-            #print 'search in current sequence element failed, try next sequence element'
-    return False
+##def modifiedCheckPrefix(seq, p,output):
+##    curElem = 0
+##    for itemset in p:
+##        #print 'search for new itemset: ',itemset
+##        for i in range(curElem,len(seq)):
+##            #print 'seq[',i,']:',seq[i],'itemset: ',itemset, 'result: ', checkSubList(seq[i],itemset)
+##            checkResult = checkSubList(seq[i],itemset)
+##            if checkResult>=0:
+##                if cmp(itemset,p[-1])==0:
+##                    output.append(i)
+##                    output.append(checkResult)
+##                    #print 'reach the last prefix element, return true'
+##                    return True
+##                else:
+##                    #print 'match found, continue the match for the next prefix element'
+##                    curElem = i+1
+##                    break
+##            elif len(itemset)!=0 and i==len(seq)-1:
+##                return False
+##            #print 'search in current sequence element failed, try next sequence element'
+##    return False
 
 # l: list,  itemset: pattern to be found.
 # neither contains sublists
 # return the index start from 0
-def checkSubList(l, itemset):
-    if(len(itemset)==0 or len(itemset)>len(l)):
-        return -1
-    for i in range(0,len(l)):
-        if l[i]==itemset[0]:
-            if(len(itemset)==1):
-                return i
-            for j in range(1,len(itemset)):
-                if l[i+j]!=itemset[j]:
-                    return -1
-                elif j==len(itemset)-1:
-                    return i+j
-    return -1
+#def checkSubList(l, itemset):
+#    if(len(itemset)==0 or len(itemset)>len(l)):
+#        return -1
+#    for i in range(0,len(l)):
+#        if l[i]==itemset[0]:
+#            if(len(itemset)==1):
+#                return i
+#            for j in range(1,len(itemset)):
+#                if l[i+j]!=itemset[j]:
+#                    return -1
+#                elif j==len(itemset)-1:
+#                    return i+j
+#    return -1
 
 # p only has two formats '#' or '_#'
-def checkSinglePrefix(seq,p,output):
-    if isNumber(p):
-        return True
-    else:
-        return False
+##def checkSinglePrefix(seq,p,output):
+##    if isNumber(p):
+##        return True
+##    else:
+##        return False
     
 
-def projection(seq, prefix):
-    index = []
-    if modifiedCheckPrefix(seq,prefix,index) == True:
-        if cmp(prefix[-1], seq[index[0]])==0:
-            return seq[index[0]+1:]
-        else:
-            ret = seq[index[0]+1:]
-            addItemset = seq[index[0]][index[1]+1:]
-            addItemset.insert(0,'_')
-            ret.insert(0,addItemset)
-            return ret
-    else:
-        #exception might be needed
-        print 'Abort - ', prefix, ' is not a prefix of the sub-sequence', seq
-        #to be tested
-        return []
+##def projection(seq, prefix):
+##    index = []
+##    if modifiedCheckPrefix(seq,prefix,index) == True:
+##        if cmp(prefix[-1], seq[index[0]])==0:
+##            return seq[index[0]+1:]
+##        else:
+##            ret = seq[index[0]+1:]
+##            addItemset = seq[index[0]][index[1]+1:]
+##            addItemset.insert(0,'_')
+##            ret.insert(0,addItemset)
+##            return ret
+##    else:
+##        #exception might be needed
+##        print 'Abort - ', prefix, ' is not a prefix of the sub-sequence', seq
+##        #to be tested
+##        return []
 
 #find all 1-length patterns in projected database[ [[]..], [[]..], [[]..] ]
 #OUT OF DATE!!! DON'T USE THIS ONE!!
-def findAllPatterns(pdb, minsup=0.0):
-    ap = []
-    #threshold = minsup*len(pdb)
-    threshold = minsup*len(db)
-    #print pdb
-    #print len(pdb)
-    #print threshold
-    counterDict = {} # list : sup
-    for s in pdb: #sequence
-        for l in s: #list
-            for i in l: #item
-                if isNumber(i):
-                    p1 = str(i)
-                    if l.index(i)>0 and l[l.index(i)-1]=='_':
-                        p1 = '_'+p1 #complex pattern  "_a"
-
-                    if counterDict.has_key(str(p1)):
-                        counterDict[p1] = counterDict[p1]+1
-                    else:
-                        counterDict.setdefault(p1,1)
-    for string,n in counterDict.iteritems():
-        #print string,' ',n
-        if n>=threshold:
-            ap.append(string)
-			                
-    return ap
+##def findAllPatterns(pdb, minsup=0.0):
+##    ap = []
+##    #threshold = minsup*len(pdb)
+##    threshold = minsup*len(db)
+##    #print pdb
+##    #print len(pdb)
+##    #print threshold
+##    counterDict = {} # list : sup
+##    for s in pdb: #sequence
+##        for l in s: #list
+##            for i in l: #item
+##                if isNumber(i):
+##                    p1 = str(i)
+##                    if l.index(i)>0 and l[l.index(i)-1]=='_':
+##                        p1 = '_'+p1 #complex pattern  "_a"
+##
+##                    if counterDict.has_key(str(p1)):
+##                        counterDict[p1] = counterDict[p1]+1
+##                    else:
+##                        counterDict.setdefault(p1,1)
+##    for string,n in counterDict.iteritems():
+##        #print string,' ',n
+##        if n>=threshold:
+##            ap.append(string)
+##			                
+##    return ap
 
 #find all 1-length patterns in projected database[ [[]..], [[]..], [[]..] ]
 def modifiedFindAllPatterns(pdb, minsup=0.0):
