@@ -9,7 +9,7 @@ import MSPS_PROJ1
 #################################################################
 def merge_item_to_sequence( i, seq):
 	if ( seq == [] ):
-		set.append([i])
+		seq.append([i])
 	elif ( seq[0][0][0] == '_' ):
 		seq[0][0] = seq[0][0][1]
 		seq[0].insert(0, i)
@@ -36,6 +36,14 @@ def shrink( db, i ):
 	for sequence in db:
 		q.append(removeItemFromSequence( sequence, i ))
 	return q
+
+#################################################################
+#
+#	Removes all item i in sequence Database
+#
+#################################################################
+def exclude(db, ik):
+
 
 #################################################################
 #
@@ -73,14 +81,19 @@ def single_prefix_projection(db, prefix):
 #	returns all the frequent item sets without sort.
 #
 #################################################################
-def r_PrefixSpan( Sk, sup):
-	freqItemDic = pickFrequentItem(Sk, sup)
+def r_PrefixSpan( Sk, sup, sdc, numItems):
+	freqItemDic = pickFrequentItem(Sk, sup, numItems )
 	output = []
 	for ik in freqItemDic:
-		ret = PrefixSpan( None, Sk, freqItemDic[i][1])
+		newSk = filterDBBySdc( Sk, freqItemDic[i][1], ik, sdc, len(Sk) )
+		#
+		#	remove all sequence that does not contain ik!
+		#
+		
+		ret = PrefixSpan( None, newSk, freqItemDic[i][1])
 		
 		#Kick out frequent sequence without ik
-		ret = exclude( ret, ik )
+		ret = excludeSequenceWithout(ret, ik)
 		output.append(ret)
 		
 		#Shrink Sequence Database
@@ -106,6 +119,19 @@ def PrefixSpan( i, Sk, sup ):
 					ret = postSeq			
 	return ret
 	
-a = [['a'], ['b', 'c', 'f', 'e'], ['a', 'b', 'f', 'd'],['d', 'g', 'q', 'z']]
-b = [['b', 'f'], ['a']]
-c = [a,b]
+#a = [['a'], ['b', 'c', 'f', 'e'], ['a', 'b', 'f', 'd'],['d', 'g', 'q', 'z']]
+#b = [['b', 'f'], ['a']]
+#c = [a,b]
+
+dataDir="./testbuild"
+datafile = dataDir+'data.txt'
+paramfile = dataDir+'para.txt'
+
+checkSequence(datafile,db)
+dbSize = len(db)
+checkParams(paramfile,mis,val)
+sdc = val[0]
+numItems = len(mis)
+
+r_PrefixSpan( db, sup, sdc, numItems )
+
