@@ -4,8 +4,8 @@ from types import *
 
 dir_home = "F:\\Course\\CS583\\PROJ1\\testbuild\\"
 dir_dt = "C:\\RAYMON\\CS583\\project1\\testbuild\\"
-datafile = dir_dt+"data.txt"
-paramfile = dir_dt+"para.txt"
+datafile = dir_home+"data.txt"
+paramfile = dir_home+"para.txt"
 db = []
 dbSize = 0
 numItems = 0
@@ -24,20 +24,26 @@ def main():
     #    print seq
     #print len(db)
     checkParams(paramfile,mis,val)
-    for miss,misss in mis.items():
-        print miss, '\t',misss
+    #for miss,misss in mis.items():
+    #    print miss, '\t',misss
     #print val[0]
     sdc = val[0]
+    numItems = len(mis)
+    #print numItems
     #print sdc
     #print mis[10]
-    pickFrequentItem(db,sup)
+    ascendFrequentItemSet = pickFrequentItem(db,sup,numItems)
+    for item in ascendFrequentItemSet.iteritems():
+        print item
     #print sup[48]
     #for item in sup.items():
     #    print item
 
-    #numItems = len(sup)
     #print dbSize
     #print numItems
+
+    
+
 
     #ascendFrequentItemSet = sorted(frequentItemSet.iteritems(), key=operator.itemgetter(0))
     #ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
@@ -54,7 +60,7 @@ def main():
     #print isNumber('_')
     #print eval('3')
     #print findAllPatterns(c)
-    print findAllPatterns(c,0.02)
+    #print findAllPatterns(c,0.02)
     
     output = []
     #print projection(a,b)
@@ -123,8 +129,9 @@ def checkParams(filename, mis, sdc):
 #error check TBD:
 #range should be modified for new test cases
 #2. mis might need to be a dict, in case the element is not consecutive ones
-def pickFrequentItem(db,sup):
-    for index in range(1,49+1):
+def pickFrequentItem(db,sup, ni):
+    #print ni
+    for index in range(1,ni+1):
         for seq in db:
             for itemset in seq:
                 if itemset.count(index)>0:
@@ -142,9 +149,12 @@ def pickFrequentItem(db,sup):
     
     ascendMIS = sorted(mis.iteritems(), key=operator.itemgetter(1))
     #print ascendMIS
+    ret = {}
     for item in ascendMIS:
         if frequentItemSet.has_key(item[0]):
-            ascendFrequentItemSet.setdefault(item[0], (ascendMIS[item[0]-1][1],sup[item[0]]))
+            ret.setdefault(item[0], (ascendMIS[item[0]-1][1],sup[item[0]]))
+
+    return ret
             
     #for index,val in frequentItemSet.items():
     #    print index, ' ', val
