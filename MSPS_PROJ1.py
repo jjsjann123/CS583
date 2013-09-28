@@ -137,7 +137,7 @@ def checkParams(filename, mis, sdc):
 #error check TBD:
 #range should be modified for new test cases
 #2. mis might need to be a dict, in case the element is not consecutive ones
-def pickFrequentItem(db,sup, ni):
+def pickFrequentItem(db,sup, ni, mis):
     #print ni
     #print mis
     for index in range(1,ni+1):
@@ -227,16 +227,16 @@ def diffItemsInDB(db):
 ##    return ret
 
 def filteredDBBySDC(db,sup,val,v_sdc,v_dbsize): #Sk
-    print 'filterDBBySDC- THRESHOLD: ',v_sdc*float(v_dbsize)
+    #print 'filterDBBySDC- THRESHOLD: ',v_sdc*float(v_dbsize)
     ret = db
     items = diffItemsInDB(db)
-    print 'diff items: ',items
+    #print 'diff items: ',items
     if items.count(val)<=0:
         print 'error in filteredSeqBySDC! - val is not contained in the seq'
     for item in items:
         
         if item != val:
-            print 'item: ',item,' val: ',val,' abs: ','item Sup: ',sup[item], ' with ',sup[val], 'margin: ',abs(sup[item]-sup[val])
+            #print 'item: ',item,' val: ',val,' abs: ','item Sup: ',sup[item], ' with ',sup[val], 'margin: ',abs(sup[item]-sup[val])
             if abs(sup[item]-sup[val])>v_sdc*float(v_dbsize):
                 ret = removeItemFromDB(ret,item)
     return ret
