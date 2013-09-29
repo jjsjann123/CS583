@@ -1,5 +1,14 @@
 from MSPS_PROJ1 import *
 
+################################################################
+#
+#		MSPS Algorithm implementation
+#		
+#		change parameter dataDir/datafile/paramfile to choose different input
+#
+#################################################################
+
+
 #################################################################
 #
 #	Testing code
@@ -18,13 +27,28 @@ def recursive(q):
 		recursive(q)
 		print q
 
+dataDir="./testbuild/"
+datafile = dataDir+'data2.txt'
+paramfile = dataDir+'para2.txt'
+
+db = []
+dbSize = 0
+numItems = 0
+mis = {}
+sdc = 0.0
+sup = {}
+val = []
+frequentItemSet = {}        #ordered by index - format- "index:sup"
+ascendFrequentItemSet = {}  # {(index, (MIS, sup))...}, ascend by MIS
+
+#################################################################
+#
+#	Testing code
+#
+#################################################################	
 def modifiedFindAllPatterns(pdb, minsup=0.0):
     ap = []
-    #threshold = minsup*len(pdb)
-    threshold = minsup*len(db)
-    #print pdb
-    #print len(pdb)
-    #print threshold
+    threshold = minsup
     counterDict = {} # list : sup
     for s in pdb: #sequence
         for l in s: #list
@@ -41,8 +65,6 @@ def modifiedFindAllPatterns(pdb, minsup=0.0):
     return ap
 
 def pickFrequentItem(db,sup, ni, mis):
-    #print ni
-    #print mis
 	countREM = {}
 	frequentItemSet = {}
 	for i in mis:
@@ -50,17 +72,13 @@ def pickFrequentItem(db,sup, ni, mis):
 		countREM.update( {i: False} )
 			
 	for seq in db:
-		print seq
 		for itemset in seq:
 			for item in itemset:
 				countREM[item] = True
-		print "flagAdded ", countREM
 		for i in countREM:
 			if countREM[i] == True:
 				countREM[i] = False
 				sup[i] += 1
-		print sup
-		print "flagCleared ", countREM
 
 	for index in sup:
 		if sup[index]/float(len(db)) >= mis[index]:
@@ -204,7 +222,6 @@ def single_prefix_projection(db, prefix):
 def r_PrefixSpan( Sk, mis, sdc, numItems):
 	sup = {}
 	freqItemDic = pickFrequentItem(Sk, sup, numItems, mis)
-	print "dic", freqItemDic
 	totalLenth = len(Sk)
 	output = []
 	for ik in freqItemDic:
@@ -213,12 +230,8 @@ def r_PrefixSpan( Sk, mis, sdc, numItems):
 			newSk = filteredDBBySDC( Sk, sup, ik, sdc, totalLenth)
 			#	remove all sequence that does not contain ik
 			newSk = exclude(newSk, ik)
-			print ik , " Sk:"
 			pp( newSk )
 			ret = PrefixSpan( None, newSk, mis[ik]*totalLenth, 0)
-			
-			print ik, "*******"
-			print ret
 			#Kick out frequent sequence without ik
 			ret = exclude(ret, ik)
 			output += ret
@@ -236,84 +249,33 @@ def r_PrefixSpan( Sk, mis, sdc, numItems):
 def PrefixSpan( item, Sk, sup, iter):
 	ret = []
 	iter += 1
-	testFlag = False
-	#print "for ", item,  ":"
 	if ( len(Sk) >= sup):
 		freItemList = modifiedFindAllPatterns(Sk, sup)
-		#print freItemList
+		print freItemList
 		pp(Sk)
 		if ( len(freItemList) != 0):
 			for next in freItemList:
 				newPrefix = merge_item_to_sequence_end( next, item )
-				print "!!!!!!!" , id(newPrefix)
-				print "??????", id(item), item
-				print "now prefix: " , newPrefix, " at: " , iter
 				ret.append( newPrefix )
-				if ( newPrefix == [['2']] ):
-					print "###############***********"
-					print "return " , ret
-				#print "return ", ret
 				SubSk = single_prefix_projection( Sk, next )
-				if ( newPrefix == [['2']] ):
-					print "####################*****"
-					print "return " , ret
-				newSeq = []
-				if ( newPrefix == [['2']] ):
-					print "####**********####****"
-					print "return " , ret
-					testFlag = True
 				newSeq = PrefixSpan( newPrefix, SubSk, sup, iter)
-				if ( testFlag ):
-					print "####**************"
-					print " prefix: ", newPrefix
-					print "return " , ret
-				#ret = ret + merge_item_to_sequence_list( next, postSeq ) 
 				ret = ret + newSeq
-				if ( testFlag ):
-					print "#########################"
-					print "return " , ret
-				testFlag = False
-					# # print "add: ", postSeq, " after: " , next
-					# ret = ret + merge_item_to_sequence_list( next, postSeq ) 
-					# # print "res: ", ret
-				# else:
-					# print "return ", ret
-					# print "return value: ", postSeq
-					# ret = postSeq
 		else:
 			print "return itself cause no freqItemfound"
-			#ret = [[[item]]]
 	else:
 		print "return itself cause length < sup"
-		#ret = [[[item]]]
 	return ret
+
+
 	
-#################################################################
-#
-#	Testing code
-#
-#################################################################	
-		
-
-dataDir="./testbuild/"
-datafile = dataDir+'data2.txt'
-paramfile = dataDir+'para2.txt'
-
-db = []
-dbSize = 0
-numItems = 0
-mis = {}
-sdc = 0.0
-sup = {}
-val = []
-frequentItemSet = {}        #ordered by index - format- "index:sup"
-ascendFrequentItemSet = {}  # {(index, (MIS, sup))...}, ascend by MIS
-
 checkSequence(datafile,db)
 dbSize = len(db)
 checkParams(paramfile,mis,val)
 sdc = val[0]
 numItems = len(mis)
-
-#output = r_PrefixSpan( db, mis, sdc, numItems)
-
+output = r_PrefixSpan( db, mis, sdc, numItems)
+print "********************************************************************"
+print "********************************************************************"
+print "********************************************************************"
+print "*******************************result*******************************"
+pp(output)
