@@ -26,6 +26,13 @@ def recursive(q):
 		q+=1
 		recursive(q)
 		print q
+		
+def sortOutput(q):
+	#for seq in q:
+	sum = 0
+	for itemset in q:
+		sum += len(itemset)
+	return sum	
 
 dataDir="./testbuild/"
 datafile = dataDir+'data2.txt'
@@ -43,7 +50,7 @@ ascendFrequentItemSet = {}  # {(index, (MIS, sup))...}, ascend by MIS
 
 #################################################################
 #
-#	Testing code
+#	re-written code
 #
 #################################################################	
 def modifiedFindAllPatterns(pdb, minsup=0.0):
@@ -94,7 +101,32 @@ def pickFrequentItem(db,sup, ni, mis):
 			ret.append(item[0])
 	return ret
 
-
+#"Still I think you CAN'T do this, because it is stated in the textbook step 3.(2)- count(MIS(ik)) as the ONLY min sup for Sk, think about it and save time -XR"
+#	
+#	J:
+#	I thought it make sense to me. I know it's not in the book but I believe it's the right thing to do.
+#	I'll keep two versions there and we can compare the output then.
+def getItemListBelowThreshold(sup, threshold):
+	list = []
+	for key in sup:
+		if sup[key] < threshold:
+			list.append(key)
+	return list
+	
+def removeItemsFromDB(db,list):
+    ret = []
+    for seq in db:
+        outputs = []
+        for itemset in seq:
+            output = []
+            for item in itemset:
+                if not item in list:
+                    output.append(item)
+            if len(output)>0:
+                outputs.append(output)
+        if len(outputs)>0:
+            ret.append(outputs)
+    return ret
 
 #################################################################
 #
@@ -222,16 +254,27 @@ def single_prefix_projection(db, prefix):
 def r_PrefixSpan( Sk, mis, sdc, numItems):
 	sup = {}
 	freqItemDic = pickFrequentItem(Sk, sup, numItems, mis)
-	totalLenth = len(Sk)
+	totalLength = len(Sk)
 	output = []
 	for ik in freqItemDic:
 		if (True):
+			#
+			#	This is a test code.
+			#	I believe it will give us the same output and save some scanning time.
+			#	I'm eliminating all items that i.count < mis(ik)*totalLength)
+			#	Unlike SDC filtering, this should be accumulative along the iteration
+			#		Because we have mis(ik) <= mis(ik+1). So this will reduce the elements in each sk.
+			removableList = getItemListBelowThreshold( sup, mis[ik]*totalLength )
+			Sk = removeItemsFromDB(Sk, removableList)
+			#	End of test code
+			
 			#	remove all item that has exceeds the support difference coverage
-			newSk = filteredDBBySDC( Sk, sup, ik, sdc, totalLenth)
+			newSk = filteredDBBySDC( Sk, sup, ik, sdc, totalLength)
+			
 			#	remove all sequence that does not contain ik
 			newSk = exclude(newSk, ik)
 			pp( newSk )
-			ret = PrefixSpan( None, newSk, mis[ik]*totalLenth, 0)
+			ret = PrefixSpan( None, newSk, mis[ik]*totalLength, 0)
 			#Kick out frequent sequence without ik
 			ret = exclude(ret, ik)
 			output += ret
@@ -274,6 +317,8 @@ checkParams(paramfile,mis,val)
 sdc = val[0]
 numItems = len(mis)
 output = r_PrefixSpan( db, mis, sdc, numItems)
+support = {}
+freqItemDic = pickFrequentItem(db, support, numItems, mis)
 print "********************************************************************"
 print "********************************************************************"
 print "********************************************************************"
