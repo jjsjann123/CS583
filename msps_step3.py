@@ -35,8 +35,9 @@ def sortOutput(q):
 	return sum	
 
 dataDir="./testbuild/"
-datafile = dataDir+'data2.txt'
-paramfile = dataDir+'para2.txt'
+datafile = dataDir+'data.txt'
+paramfile = dataDir+'para.txt'
+outputfile = dataDir+'output.txt'
 
 db = []
 dbSize = 0
@@ -128,6 +129,46 @@ def removeItemsFromDB(db,list):
             ret.append(outputs)
     return ret
 
+def getItemListOutSDC(item, sdc, sup):
+	list = []
+	low = sup[item] - sdc
+	high = sup[item] + sdc
+	for key in sup:
+		if sup[key] < low or sup[key] > high:
+			list.append(key)
+	return list
+	
+def parseOutput( input ):
+	global outputfile
+	f = open(outputfile, 'w')
+	sortedOutput = sorted( input, key=sortOutput )
+	output = {}
+	for q in sortedOutput:
+		length = sortOutput(q)
+		num = output.get(length)
+		if num == None:
+			num = 0
+		num += 1
+		output.update( {length: num} )
+	print output
+	
+	index = 0
+	for item in output:
+		anchor = index + output[item]
+		newline = "Frequent sequence with length: " + str(item) + " [ Total #: " + str(output[item]) + " ]\n"
+		print newline
+		f.write(newline)
+		for i in range (index, anchor):
+			print sortedOutput[i]
+			seq = str(sortedOutput[i]) 
+			seq = '<' + seq[1:]
+			seq = seq[0:-1] + '>\n'
+			seq = seq.replace('[', '{')
+			seq = seq.replace(']', '}')
+			seq = seq.replace("'", '')
+			f.write(seq)
+			
+		index = anchor
 #################################################################
 #
 #	Merge the postFix sequence list to the prefix item i.
@@ -274,7 +315,7 @@ def r_PrefixSpan( Sk, mis, sdc, numItems):
 			#	remove all sequence that does not contain ik
 			newSk = exclude(newSk, ik)
 			pp( newSk )
-			ret = PrefixSpan( None, newSk, mis[ik]*totalLength, 0)
+			ret = PrefixSpan( None, newSk, mis[ik]*totalLength, 0, sup, sdc, totalLength)
 			#Kick out frequent sequence without ik
 			ret = exclude(ret, ik)
 			output += ret
@@ -289,7 +330,7 @@ def r_PrefixSpan( Sk, mis, sdc, numItems):
 #	PrefixSpan. 
 #
 #################################################################	
-def PrefixSpan( item, Sk, sup, iter):
+def PrefixSpan( item, Sk, sup, iter, supList, sdc, totalLength):
 	ret = []
 	iter += 1
 	if ( len(Sk) >= sup):
@@ -301,7 +342,14 @@ def PrefixSpan( item, Sk, sup, iter):
 				newPrefix = merge_item_to_sequence_end( next, item )
 				ret.append( newPrefix )
 				SubSk = single_prefix_projection( Sk, next )
-				newSeq = PrefixSpan( newPrefix, SubSk, sup, iter)
+				
+				# This is different from the procedures written in the textbook.
+				if next[0] == '_':
+					next = next[1:]
+				removableList = getItemListOutSDC( next, sdc*totalLength, supList)
+				SubSk = removeItemsFromDB( SubSk, removableList)
+				
+				newSeq = PrefixSpan( newPrefix, SubSk, sup, iter, supList, sdc, totalLength)
 				ret = ret + newSeq
 		else:
 			print "return itself cause no freqItemfound"
@@ -317,10 +365,14 @@ checkParams(paramfile,mis,val)
 sdc = val[0]
 numItems = len(mis)
 output = r_PrefixSpan( db, mis, sdc, numItems)
-support = {}
-freqItemDic = pickFrequentItem(db, support, numItems, mis)
+#support = {}
+#freqItemDic = pickFrequentItem(db, support, numItems, mis)
 print "********************************************************************"
 print "********************************************************************"
 print "********************************************************************"
 print "*******************************result*******************************"
-pp(output)
+parseOutput(output)
+
+
+
+
